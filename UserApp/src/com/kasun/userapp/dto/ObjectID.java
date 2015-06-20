@@ -19,6 +19,7 @@ public class ObjectID {
     private Dimensions penStock;
     private Dimensions tailRace;
     private Dimensions distanceFromRoadToPowerHouse;
+    private Dimensions distanceFromRoadToPowerWeir;
     private Dimensions catchmentArea;
     private Dimensions head;
 
@@ -76,5 +77,13 @@ public class ObjectID {
 
     public void setHead(Dimensions head) {
         this.head = head;
+    }
+
+    public Dimensions getDistanceFromRoadToPowerWeir() {
+        return distanceFromRoadToPowerWeir;
+    }
+
+    public void setDistanceFromRoadToPowerWeir(Dimensions distanceFromRoadToPowerWeir) {
+        this.distanceFromRoadToPowerWeir = distanceFromRoadToPowerWeir;
     }
 }
