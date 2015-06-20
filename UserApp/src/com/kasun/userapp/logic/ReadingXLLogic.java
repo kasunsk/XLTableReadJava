@@ -14,98 +14,70 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by kasun on 6/20/15.
+ * Created by Kasun Kariyawasam on 6/20/15.
  */
 public class ReadingXLLogic {
 
     private static final String FILE_PATH = "/home/kasun/Downloads/Final.xlsx";
     private static final String MAIN_TABLE_NAME = "OBJECTID";
+    private static final String TABLE_END_HINT = "Aproximate power can generate";
 
-    public String readXLSheet(){
-        int cellToAdd = 0;
-        String dimensionType = null;
+    public List getAllTheTablesAsList(){
 
-        List studentList = new ArrayList();
+        List tableList = new ArrayList<ObjectID>();
         FileInputStream fis = null;
 
         try{
             fis = new FileInputStream(FILE_PATH);
             Workbook workbook = new XSSFWorkbook(fis);
 
-            int numberOfSheets = workbook.getNumberOfSheets();
-            System.out.println("Number Of Sheets = "+numberOfSheets);
-
-            for (int i=0 ; i < numberOfSheets ; i++){
-                Sheet sheet = workbook.getSheetAt(i);
+                Sheet sheet = workbook.getSheetAt(0);
                 Iterator rowIterator = sheet.iterator();
+                ObjectID objectID = null;
+                String dimensionType = null;
 
                     while (rowIterator.hasNext()) {
-
-                        ObjectID objectID = new ObjectID();
-
                         Dimensions dimensions = null;
                         Row row = (Row) rowIterator.next();
                         Iterator cellIterator = row.cellIterator();
 
-                        while (cellIterator.hasNext()) {
-                            Cell cell = (Cell) cellIterator.next();
+                            while (cellIterator.hasNext()) {
+                                Cell cell = (Cell) cellIterator.next();
 
-                            if(isCellTypeNumeric(cell)) {
-                                System.out.print(cell.getNumericCellValue()+" , ");
-                                addValuesToDimension(dimensions,cell);
+                                if (isCellTypeNumeric(cell)) {
+                                    System.out.print(cell.getNumericCellValue() + " , ");
+                                    addValuesToDimension(dimensions, cell);
 
-                            }else if(isCellTypeString(cell)){
+                                } else if (isCellTypeString(cell)) {
 
-                                dimensionType = setDimetionType(dimensionType, cell);
-                                dimensions = new Dimensions();
-                                System.out.print(" ");
+                                    if(cell.getStringCellValue().equals(TABLE_END_HINT)) {
+                                        if(objectID != null){
+                                            tableList.add(objectID);
+                                        }
+                                        break;
+                                    }
+
+                                    if (cell.getStringCellValue().equals(MAIN_TABLE_NAME)) {
+                                        objectID = new ObjectID();
+                                    }
+                                    dimensionType = setDimensionType(dimensionType, cell);
+                                    dimensions = new Dimensions();
+                                    System.out.print(" ");
+                                }
                             }
-//                            if (isCellTypeString(cell)) {
-//
-//                                if (cell.getStringCellValue().equals(MAIN_TABLE_NAME)) {
-//                                    System.out.println();
-//
-//                                }else {
-//
-//                                    if (cell.getStringCellValue().equals(ObjectID.WEIR)) {
-//                                        System.out.print("Came here");
-//                                        dimensionType = ObjectID.WEIR;
-//                                    }
-//
-//                                    System.out.print(cell.getStringCellValue() + " , ");
-//                                }
-//
-//                            } else if (isCellTypeNumeric(cell)) {
-//
-//                                if (isNextCellNotAString(cellIterator)) {
-//
-////                                    dimensions.setApproximate(cell.getNumericCellValue());
-//                                    System.out.print(cell.getNumericCellValue() + " , ");
-//                                }else{
-//                                    System.out.print(cell.getNumericCellValue() + " , ");
-//                                }
-//
-//                                addValuesToDimension(dimensions, cell);
-//                            }
-
-
+                            setDimensionToObjectID(dimensionType, objectID, dimensions);
                         }
-
-                        setDimensionToObjectID(dimensionType, objectID, dimensions);
                         System.out.println();
-                    }
-            }
-
-
         }catch (Exception ex){
             System.out.println(ex.getMessage());
             throw new RuntimeException();
         }
 
-        return null;
+        return tableList;
     }
 
-    private String setDimetionType(String dimensionType, Cell cell) {
+    private String setDimensionType(String dimensionType, Cell cell) {
+
         if(cell.getStringCellValue().equals(ObjectID.WEIR)){
             dimensionType = ObjectID.WEIR;
         }else if(cell.getStringCellValue().equals(ObjectID.CANAL)){
@@ -185,11 +157,5 @@ public class ReadingXLLogic {
     private boolean isCellTypeString(Cell cell) {
 
         return Cell.CELL_TYPE_STRING == cell.getCellType();
-    }
-
-
-    private  boolean isNextCellNotAString(Iterator cellIterator) {
-
-        return cellIterator.hasNext() && !(((Cell) cellIterator.next()).getCellType()==Cell.CELL_TYPE_STRING);
     }
 }
