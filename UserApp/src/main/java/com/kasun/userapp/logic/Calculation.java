@@ -3,6 +3,7 @@ package com.kasun.userapp.logic;
 import com.kasun.userapp.dto.ObjectID;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -24,21 +25,35 @@ public class Calculation {
     public static void main(String args[]){
 
         Calculation calculation = new Calculation();
-        System.out.print(calculation.valueOfPowerPlant(Long.parseLong("1000")));
+        System.out.print(calculation.valueOfPowerPlant(new BigDecimal("10000")));
     }
 
-    public String calculateBestPerformanceTable(List<ObjectID> tables){
+    public Map<String , List<BigDecimal>> calculatePValuesAndValueOfPowerPlant(List<ObjectID> tables){
 
         setMinimumValues(tables);
+        Map<String , List<BigDecimal>> requiredValues = new HashMap<String, List<BigDecimal>>();
+        List<BigDecimal> values = null;
+        int tableNumber = 1;
 
-        return null;
+        for (ObjectID objectID : tables){
+            values = new ArrayList<BigDecimal>();
+            BigDecimal pValue = calculateP(objectID.getCatchmentArea().getValue(), objectID.getHead().getValue());
+            values.add(pValue);
+            BigDecimal valueOfPowerPlant = valueOfPowerPlant(calculateEquationXValue(objectID));
+            values.add(valueOfPowerPlant);
+            String key = tableNumber + "";
+            requiredValues.put(key, values);
+            tableNumber++;
+        }
+
+        return requiredValues;
     }
 
 
     public BigDecimal calculateP(Double catchmentArea, Double head){
 
-        BigDecimal catchmentValue = new BigDecimal(catchmentArea);
-        BigDecimal headValue = new BigDecimal(head);
+        BigDecimal catchmentValue = new BigDecimal(Double.toString(catchmentArea));
+        BigDecimal headValue = new BigDecimal(Double.toString(head));
 
         BigDecimal upperValueFirstPart = catchmentValue.multiply(new BigDecimal("3590")).multiply(new BigDecimal("80")).scaleByPowerOfTen(6) ;
         BigDecimal upperValueSecondPart = (new BigDecimal("0.7")).multiply(new BigDecimal("9.8")).multiply(headValue);
@@ -46,14 +61,14 @@ public class Calculation {
 
         BigDecimal lowerValue = (new BigDecimal("365")).multiply(new BigDecimal("24")).multiply(new BigDecimal("60")).scaleByPowerOfTen(5);
 
-        BigDecimal finalUnswerForP= upperValue.divide(lowerValue);
+        BigDecimal finalAnswerForP= upperValue.divide(lowerValue, 4, RoundingMode.HALF_UP);
 
-        return finalUnswerForP;
+        return finalAnswerForP;
     }
 
-    public Long valueOfPowerPlant(Long equationXValue){
+    public BigDecimal valueOfPowerPlant(BigDecimal equationXValue){
 
-        return 1000/equationXValue;
+        return new BigDecimal("1000").divide(equationXValue, 4, RoundingMode.HALF_UP);
     }
 
     private void setMinimumValues(List<ObjectID> tables) {
@@ -101,11 +116,18 @@ public class Calculation {
     }
 
 
-    public String calculateEquationX(ObjectID objectID){
+    public BigDecimal calculateEquationXValue(ObjectID objectID){
 
-        BigDecimal partOne = (new BigDecimal(objectID.getWeir().getValue()).subtract(new BigDecimal(MINIMUM_WEIR_LENGTH))).multiply(new BigDecimal("6")).divide(new BigDecimal("6"));
-        BigDecimal partTwo = (new BigDecimal(objectID.getCatchmentArea().getValue()).subtract(new BigDecimal(MINIMUM_CATCHMENT_AREA))).multiply(new BigDecimal("6")).divide(new BigDecimal("2.5"));
-        BigDecimal partThree = (new BigDecimal(objectID.getCanal().getValue()).subtract(new BigDecimal(MINIMUM_CANAL_LENGTH))).multiply(new BigDecimal("3.5")).divide(new BigDecimal("150"));
-        return null;
+        BigDecimal partOne = (new BigDecimal(objectID.getWeir().getValue()).subtract(new BigDecimal(MINIMUM_WEIR_LENGTH))).multiply(new BigDecimal("6")).divide(new BigDecimal("6"), 4, RoundingMode.HALF_UP);
+        BigDecimal partTwo = (new BigDecimal(objectID.getCatchmentArea().getValue()).subtract(new BigDecimal(MINIMUM_CATCHMENT_AREA))).multiply(new BigDecimal("6")).divide(new BigDecimal("2.5"), 4, RoundingMode.HALF_UP);
+        BigDecimal partThree = (new BigDecimal(objectID.getCanal().getValue()).subtract(new BigDecimal(MINIMUM_CANAL_LENGTH))).multiply(new BigDecimal("3.5")).divide(new BigDecimal("150"), 4, RoundingMode.HALF_UP);
+        BigDecimal partFour = (new BigDecimal(objectID.getHead().getValue()).subtract(new BigDecimal(MINIMUM_HEAD))).multiply(new BigDecimal("5")).divide(new BigDecimal("15"), 4, RoundingMode.HALF_UP);
+        BigDecimal partFive = (new BigDecimal(objectID.getPenStock().getValue()).subtract(new BigDecimal(MINIMUM_PENSTOCK))).multiply(new BigDecimal("4")).divide(new BigDecimal("55"), 4, RoundingMode.HALF_UP);
+        BigDecimal partSix = (new BigDecimal(objectID.getDistanceFromRoadToPowerWeir().getValue()).subtract(new BigDecimal(MINIMUM_ROAD_DISTANCE_TO_WEIR))).multiply(new BigDecimal("1.5")).divide(new BigDecimal("15"), 4, RoundingMode.HALF_UP);
+        BigDecimal partSeven = (new BigDecimal(objectID.getDistanceFromRoadToPowerHouse().getValue()).subtract(new BigDecimal(MINIMUM_ROAD_DISTANCE_TO_HOUSE))).multiply(new BigDecimal("2.5")).divide(new BigDecimal("60"), 4, RoundingMode.HALF_UP);
+        BigDecimal partEight = (new BigDecimal(objectID.getTailRace().getValue()).subtract(new BigDecimal(MINIMUM_TAILRACE_LANGTH))).multiply(new BigDecimal("3")).divide(new BigDecimal("16"), 4, RoundingMode.HALF_UP);
+
+        BigDecimal finalAnswer = partOne.subtract(partTwo).add(partThree).subtract(partFour).add(partFive).add(partSix).add(partSeven).add(partEight);
+        return finalAnswer;
     }
 }

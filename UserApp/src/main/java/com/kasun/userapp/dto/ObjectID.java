@@ -10,7 +10,7 @@ public class ObjectID {
     public static final String PENSTOCK = "penstock";
     public static final String TAILRACE = "tailrace";
     public static final String DISTANCE_FROM_ROAD_TO_POWER_HOUSE = "distance from road to power house";
-    public static final String DISTANCE_FROM_ROAD_TO_POWER_WEIR = "distance from road to power weir";
+    public static final String DISTANCE_FROM_ROAD_TO_POWER_WEIR = "distance from road to weir";
     public static final String CATCHMENT_AREA = "catchment area";
     public static final String HEAD = "head";
 

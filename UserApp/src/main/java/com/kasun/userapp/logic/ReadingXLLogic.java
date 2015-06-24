@@ -22,53 +22,56 @@ public class ReadingXLLogic {
     private static final String MAIN_TABLE_NAME = "OBJECTID";
     private static final String TABLE_END_HINT = "Aproximate power can generate";
 
-    public List getAllTheTablesAsList(){
+
+    public List getAllTheTablesAsList() {
 
         List tableList = new ArrayList<ObjectID>();
         FileInputStream fis = null;
 
-        try{
+        try {
             fis = new FileInputStream(FILE_PATH);
             Workbook workbook = new XSSFWorkbook(fis);
 
-                Sheet sheet = workbook.getSheetAt(0);
-                Iterator rowIterator = sheet.iterator();
-                ObjectID objectID = null;
-                String dimensionType = null;
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator rowIterator = sheet.iterator();
+            ObjectID objectID = null;
+            String dimensionType = null;
 
-                    while (rowIterator.hasNext()) {
-                        Dimensions dimensions = null;
-                        Row row = (Row) rowIterator.next();
-                        Iterator cellIterator = row.cellIterator();
+            while (rowIterator.hasNext()) {
+                Dimensions dimensions = null;
+                Row row = (Row) rowIterator.next();
+                Iterator cellIterator = row.cellIterator();
 
-                            while (cellIterator.hasNext()) {
-                                Cell cell = (Cell) cellIterator.next();
+                while (cellIterator.hasNext()) {
+                    Cell cell = (Cell) cellIterator.next();
 
-                                if (isCellTypeNumeric(cell)) {
-                                    System.out.print(cell.getNumericCellValue() + " , ");
-                                    addValuesToDimension(dimensions, cell);
-
-                                } else if (isCellTypeString(cell)) {
-
-                                    if(cell.getStringCellValue().equals(TABLE_END_HINT)) {
-                                        if(objectID != null){
-                                            tableList.add(objectID);
-                                        }
-                                        break;
-                                    }
-
-                                    if (cell.getStringCellValue().equals(MAIN_TABLE_NAME)) {
-                                        objectID = new ObjectID();
-                                    }
-                                    dimensionType = setDimensionType(dimensionType, cell);
-                                    dimensions = new Dimensions();
-                                    System.out.print(" ");
-                                }
-                            }
-                            setDimensionToObjectID(dimensionType, objectID, dimensions);
-                            System.out.println();
+                    if (isCellTypeNumeric(cell)) {
+                        System.out.print(cell.getNumericCellValue() + " , ");
+                        if (dimensions != null) {
+                            addValuesToDimension(dimensions, cell);
                         }
-        }catch (Exception ex){
+
+                    } else if (isCellTypeString(cell)) {
+
+                        if (cell.getStringCellValue().equals(TABLE_END_HINT)) {
+                            if (objectID != null) {
+                                tableList.add(objectID);
+                            }
+                            break;
+                        } else if (cell.getStringCellValue().equals(MAIN_TABLE_NAME)) {
+                            objectID = new ObjectID();
+                        } else if (isDimensionType(cell)) {
+                            dimensionType = setDimensionType(dimensionType, cell);
+                            dimensions = new Dimensions();
+                            System.out.print(" ");
+
+                        }
+                    }
+                }
+                setDimensionToObjectID(dimensionType, objectID, dimensions);
+                System.out.println();
+            }
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
             throw new RuntimeException();
         }
@@ -76,31 +79,44 @@ public class ReadingXLLogic {
         return tableList;
     }
 
+
+    private boolean isDimensionType(Cell cell) {
+
+        String dimensionType = cell.getStringCellValue();
+        return (dimensionType.equals(ObjectID.CANAL) || dimensionType.equals(ObjectID.WEIR) ||
+                dimensionType.equals(ObjectID.CATCHMENT_AREA) || dimensionType.equals(ObjectID.DISTANCE_FROM_ROAD_TO_POWER_HOUSE)
+                ||
+                dimensionType.equals(ObjectID.DISTANCE_FROM_ROAD_TO_POWER_WEIR) || dimensionType.equals(ObjectID.PENSTOCK) ||
+                dimensionType.equals(ObjectID.TAILRACE) || dimensionType.equals(ObjectID.HEAD));
+    }
+
+
     private String setDimensionType(String dimensionType, Cell cell) {
 
-        if(cell.getStringCellValue().equals(ObjectID.WEIR)){
+        if (cell.getStringCellValue().equals(ObjectID.WEIR)) {
             dimensionType = ObjectID.WEIR;
-        }else if(cell.getStringCellValue().equals(ObjectID.CANAL)){
+        } else if (cell.getStringCellValue().equals(ObjectID.CANAL)) {
             dimensionType = ObjectID.CANAL;
-        }else if(cell.getStringCellValue().equals(ObjectID.CATCHMENT_AREA)){
+        } else if (cell.getStringCellValue().equals(ObjectID.CATCHMENT_AREA)) {
             dimensionType = ObjectID.CATCHMENT_AREA;
-        }else if(cell.getStringCellValue().equals(ObjectID.DISTANCE_FROM_ROAD_TO_POWER_HOUSE)){
+        } else if (cell.getStringCellValue().equals(ObjectID.DISTANCE_FROM_ROAD_TO_POWER_HOUSE)) {
             dimensionType = ObjectID.DISTANCE_FROM_ROAD_TO_POWER_HOUSE;
-        }else if(cell.getStringCellValue().equals(ObjectID.DISTANCE_FROM_ROAD_TO_POWER_WEIR)){
+        } else if (cell.getStringCellValue().equals(ObjectID.DISTANCE_FROM_ROAD_TO_POWER_WEIR)) {
             dimensionType = ObjectID.DISTANCE_FROM_ROAD_TO_POWER_WEIR;
-        }else if(cell.getStringCellValue().equals(ObjectID.TAILRACE)){
+        } else if (cell.getStringCellValue().equals(ObjectID.TAILRACE)) {
             dimensionType = ObjectID.TAILRACE;
-        }else if(cell.getStringCellValue().equals(ObjectID.PENSTOCK)){
+        } else if (cell.getStringCellValue().equals(ObjectID.PENSTOCK)) {
             dimensionType = ObjectID.PENSTOCK;
-        }else if(cell.getStringCellValue().equals(ObjectID.HEAD)){
+        } else if (cell.getStringCellValue().equals(ObjectID.HEAD)) {
             dimensionType = ObjectID.HEAD;
         }
         return dimensionType;
     }
 
+
     private void setDimensionToObjectID(String dimensionType, ObjectID objectID, Dimensions dimensions) {
 
-        if(dimensions != null && objectID != null && dimensionType!= null) {
+        if (dimensions != null && objectID != null && dimensionType != null) {
 
             if (dimensionType.equals(ObjectID.WEIR)) {
                 objectID.setWeir(dimensions);
@@ -122,10 +138,10 @@ public class ReadingXLLogic {
         }
     }
 
+
     private void addValuesToDimension(Dimensions dimensions, Cell cell) {
 
-
-        if(!(cell == null) && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+        if (!(cell == null) && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
 
             if (!isCellValueNull(cell) && cell.getColumnIndex() == 2) {
                 dimensions.setShapeLength(cell.getNumericCellValue());
