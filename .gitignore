@@ -1,0 +1,9 @@
+UserApp/bin/
+UserApp/.settings/
+UserApp/.project
+UserApp/.gradle/1.11/
+UserApp/.gitignore.swp
+UserApp/.classpath
+.idea/
+UserApp/UserApp.iml
+UserApp/UserApp.ipr
