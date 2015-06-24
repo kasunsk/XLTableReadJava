@@ -15,13 +15,11 @@ public class MainClass {
 
     public static void main(String args []){
 
-        BigDecimal upperValueSecondPart = BigDecimal.TEN.scaleByPowerOfTen(6);
         ReadingXLLogic readingXLLogic = new ReadingXLLogic();
         List<ObjectID> tables = readingXLLogic.getAllTheTablesAsList();
         Calculation calculation = new Calculation();
         Map<String , List<BigDecimal>> pValuesAndPowerPlantValues = calculation.calculatePValuesAndValueOfPowerPlant(tables);
         printCalculatedValues(pValuesAndPowerPlantValues);
-
     }
 
 
