@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class ReadingXLLogic {
 
-    private static final String FILE_PATH = "/home/kasun/Downloads/Book1.xlsx";
+    private static final String FILE_PATH = "Book1.xlsx";
     private static final String MAIN_TABLE_NAME = "OBJECTID";
     private static final String TABLE_END_HINT = "Aproximate power can generate";
 

@@ -25,13 +25,17 @@ public class MainClass {
 
     private static void printCalculatedValues(Map<String, List<BigDecimal>> pValuesAndPowerPlantValues) {
 
+        System.out.println("TABLE NUMBER       P Value      Value Of Power Plant");
+        System.out.println("------------------------------------------------------");
+
         for(Map.Entry<String, List<BigDecimal>> entry : pValuesAndPowerPlantValues.entrySet()){
-            System.out.print("Table Number : "+entry.getKey()+" ");
+            System.out.print("     " + entry.getKey() + "       |     ");
 
             for(BigDecimal value : entry.getValue()){
-                System.out.print(value + " ");
+                System.out.print(value + "        ");
             }
             System.out.println();
         }
+        System.out.println("-------------------------------------------------------");
     }
 }
